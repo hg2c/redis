@@ -1,23 +1,44 @@
-master:
-  image: redis:latest
-slave:
-  image: redis:latest
-  command: redis-server --slaveof redis-master 6379
-  links:
-    - master:redis-master
-sentinel:
-  build: sentinel
-  environment:
-    - SENTINEL_DOWN_AFTER=5000
-    - SENTINEL_FAILOVER=5000
-  links:
-    - master:redis-master
-    - slave
-phpredisadmin:
-  image: erikdubbelboer/phpredisadmin:latest
-  restart: always
-  links:
-    - master:master
-  environment:
-    - VIRTUAL_HOST=${PHPREDISADMIN_URL}
-    - REDIS_1_HOST=master
+version: '2'
+services:
+  master:
+    image: redis:latest
+    ports:
+      - 26379:6379
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 32000
+        hard: 40000
+  slave:
+    image: redis:latest
+    command: redis-server --slaveof redis-master 6379
+    links:
+      - master:redis-master
+    ports:
+      - 26380:6379
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 32000
+        hard: 40000
+  sentinel:
+    build: sentinel
+    environment:
+      - SENTINEL_DOWN_AFTER=5000
+      - SENTINEL_FAILOVER=5000
+    links:
+      - master:redis-master
+      - slave
+  phpredisadmin:
+    image: erikdubbelboer/phpredisadmin:latest
+    restart: always
+    links:
+      - master:master
+    environment:
+      - VIRTUAL_HOST=${PHPREDISADMIN_URL}
+      - REDIS_1_HOST=master
+
+networks:
+  default:
+    external:
+      name: sahaba
