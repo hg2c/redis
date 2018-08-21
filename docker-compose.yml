@@ -2,6 +2,8 @@ version: '2'
 services:
   master:
     image: redis:latest
+    volumes:
+      - master-data:/data
     ports:
       - 26379:6379
     ulimits:
@@ -11,6 +13,8 @@ services:
         hard: 40000
   slave:
     image: redis:latest
+    volumes:
+      - slave-data:/data
     command: redis-server --slaveof redis-master 6379
     links:
       - master:redis-master
@@ -42,3 +46,7 @@ networks:
   default:
     external:
       name: sahaba
+
+volumes:
+  master-data:
+  slave-data:
