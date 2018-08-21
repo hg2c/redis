@@ -41,6 +41,7 @@ services:
     environment:
       - VIRTUAL_HOST=${PHPREDISADMIN_URL}
       - REDIS_1_HOST=master
+      - REDIS_2_HOST=slave
 
 networks:
   default:
